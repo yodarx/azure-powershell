@@ -13,6 +13,7 @@ pool:
 steps:
 
 - task: DotNetCoreCLI@2
+  displayName: Build for Version Bump
   inputs:
     command: 'custom'
     custom: 'msbuild'
@@ -24,3 +25,26 @@ steps:
     scanType: 'Register'
     verbosity: 'Normal'
     alertWarningLevel: 'High'
+
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: '.\RunVersionController.ps1 -Release "August 2020"'
+    errorActionPreference: 'continue'
+    pwsh: true
+    workingDirectory: './tools'
+
+- task: DotNetCoreCLI@2
+  displayName: Build for Version Bump
+  inputs:
+    command: 'custom'
+    custom: 'msbuild'
+    arguments: 'build.proj /t:Build;GenerateHelp /p:Configuration=Release'
+
+- task: DotNetCoreCLI@2
+  displayName: Build for Version Bump
+  inputs:
+    command: 'custom'
+    custom: 'msbuild'
+    arguments: 'build.proj /t:Publish /p:Configuration=Release;NuGetKey=123456'
+
